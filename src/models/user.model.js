@@ -3,7 +3,7 @@
 // jike pass token hoga usko data mil jaaega 
 
 
-import mongoose,{schema} from "mongoose";
+import mongoose,{Schema} from "mongoose";
 import mongooseAggreatePaginate from "mongoose-aggregate-paginate-v2";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -59,13 +59,15 @@ const userSchema=new mongoose.Schema(
     },{timestamps:true} );
 
 
-userSchema.pre("save", async function (next) {  // ye function tab chalega jab bhi user save hoga
-   if (!this.isModified("password")) return next(); // agar password modify nahi hua to next pe jao
-    {
-        this.password= bcrypt.hash(this.password,10);
-        next();
-    }
-});   
+userSchema.pre("save", async function () {
+    // 1. Check karo agar password modify hua hai
+    if (!this.isModified("password")) return; 
+
+    // 2. Password hash karo
+    this.password = await bcrypt.hash(this.password, 10);
+    
+    // Yahan next() ki zaroorat nahi kyunki function 'async' hai
+});
 
                     // isPasswordCorrect khud ka function hai jo humne banaya hai
 userSchema.methods.isPasswordCorrect= async function(password){  // ye function password ko compare karega
@@ -73,7 +75,7 @@ userSchema.methods.isPasswordCorrect= async function(password){  // ye function 
 }
 
 userSchema.methods.generateAccessToken= function(){// ye function access token generate karega
-    jwt.sign(
+    return jwt.sign(
         {_id:this._id,
         username:this.username,
         fullname:this.fullname,
@@ -86,7 +88,7 @@ userSchema.methods.generateAccessToken= function(){// ye function access token g
     
 }
 userSchema.methods.generateRefreshToken= function(){// ye function refresh token generate karega
-    jwt.sign(
+   return jwt.sign(
         {_id:this._id,  
         },
         process.env.REFRESH_TOKEN_SECRET,

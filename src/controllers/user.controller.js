@@ -41,14 +41,15 @@ const registerUser=asyncHandler(async(req,res)=>{
     if(!avatarLocalPath){
         throw new ApiError (400,"Avatar image is required");
     }
-    if(!coverImageLocalPath){
-        throw new ApiError (400,"Cover image is required");
-    }
+    console.log("Avatar Path found:", avatarLocalPath); // Debugging ke liye
+   
 
     // 5.
 
     const avatar = await uploadCloudinary(avatarLocalPath);
     const coverImage = await uploadCloudinary(coverImageLocalPath);
+    console.log("Cloudinary Upload Result:", avatar);
+    console.log("Cloudinary Upload Result:", coverImage);
 
     if(!avatar){
         throw new ApiError(400,"Avatar image is required");
@@ -65,6 +66,8 @@ const registerUser=asyncHandler(async(req,res)=>{
         email,
         password,
     });
+
+    console.log("DB Name used:", user.db.name);
 
     // 6.
     
